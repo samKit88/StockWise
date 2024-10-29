@@ -5,7 +5,7 @@ import router from './routers/routers'
 // import { AuthContextProvider } from './context/AuthContext'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Provider } from 'react-redux'
-import store, { persistor } from './store/store'
+import store, { persistor } from './services/store/store'
 import { MantineProvider } from '@mantine/core'
 const queryClient = new QueryClient()
 import '@mantine/notifications/styles.css'
