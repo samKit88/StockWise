@@ -1,57 +1,50 @@
-import { Table } from '@mantine/core'
+import { Table, TableTbody, TableTh, TableThead, TableTr } from '@mantine/core'
 import TableRow from './ui/TableRow'
 
-const headerData = [
-  {
-    id: 1,
-    name: 'Name',
-    code: 'Code',
-    category: 'Category',
-    brand: 'Brand',
-    buyingPrice: 'Buying Price',
-    sellingPrice: 'Selling Price',
-    productUnit: 'Product Unit',
-    quantity: 'Quantity',
-    taxType: 'Tax Type',
-    description: 'Description',
-    productType: 'Product Type',
-    action: 'Action',
-  },
-]
+type NestedKeyOf<ObjectType> = {
+  [Key in keyof ObjectType & (string | number)]: ObjectType[Key] extends Record<
+    string,
+    any
+  > // Check if the property is an object
+    ? `${Key}.${NestedKeyOf<ObjectType[Key]>}` | Key // Nested keys with current key
+    : Key // Direct key if not an object
+}[keyof ObjectType & (string | number)] // Restrict to valid types
 
-const header = headerData.map((row) => (
-  <Table.Tr key={row.id}>
-    <Table.Th>{row.name}</Table.Th>
-    <Table.Th>{row.code}</Table.Th>
-    <Table.Th>{row.category}</Table.Th>
-    <Table.Th>{row.brand}</Table.Th>
-    <Table.Th>{row.buyingPrice}</Table.Th>
-    <Table.Th>{row.sellingPrice}</Table.Th>
-    <Table.Th>{row.productUnit}</Table.Th>
-    <Table.Th>{row.quantity}</Table.Th>
-    <Table.Th>{row.taxType}</Table.Th>
-    <Table.Th>{row.description}</Table.Th>
-    <Table.Th>{row.productType}</Table.Th>
-    <Table.Th>{row.action}</Table.Th>
-  </Table.Tr>
-))
+export type Column<T> = {
+  heading: string
+  value?: NestedKeyOf<T>
+  render?: (item: T) => JSX.Element
+}
 
-const ProductTable = ({ inventory, onView, onEdit, onDelete }) => {
+interface ProductTableProp<T> {
+  data: T[]
+  column: Column<T>[]
+}
+
+const ProductTable = <T,>({ data, column }: ProductTableProp<T>) => {
+  console.log('data from the table', data)
   return (
-    <Table highlightOnHover verticalSpacing="lg" horizontalSpacing="sm">
-      <Table.Thead className="bg-gray-50 text-xs text-gray-600 font-serif">
-        {header}
-      </Table.Thead>
-      <Table.Tbody className="text-gray-600 text-xs">
-        <TableRow
-          inventory={inventory}
-          onView={onView}
-          onEdit={onEdit}
-          onDelete={onDelete}
-        />
-      </Table.Tbody>
+    <Table
+      className="bg-gray-50 text-xs"
+      highlightOnHover
+      verticalSpacing="lg"
+      horizontalSpacing="sm"
+    >
+      <TableThead className=" text-gray-600 font-serif">
+        <TableTr>
+          {column.map((item, index) => (
+            <TableHeadItem item={item} />
+          ))}
+        </TableTr>
+      </TableThead>
+      <TableTbody className="text-gray-600 text-xs ">
+        {data?.map((item, index) => (
+          <TableRow item={item} column={column} />
+        ))}
+      </TableTbody>
     </Table>
   )
 }
 
+const TableHeadItem = ({ item }) => <TableTh>{item.heading}</TableTh>
 export default ProductTable
