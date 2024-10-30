@@ -1,183 +1,139 @@
+import { Grid, Modal, ModalBody, Text } from '@mantine/core'
+import DeleteInventory from '../DeleteInventoryModal'
+import AuthForm from './Form'
 import {
-  Autocomplete,
-  Button,
-  Grid,
-  Modal,
-  ModalBody,
-  NativeSelect,
-  NumberInput,
-  TextInput,
-} from '@mantine/core'
+  addItemConfig,
+  addPartnerConfig,
+  addSalesConfig,
+} from '../../types/FormFileds'
+import { UseFormReturnType } from '@mantine/form'
+import { useEffect, useState } from 'react'
+import { fetchInventorysQuery } from '../../services/shared/inventory.query'
+import { fetchPartnerQuery } from '../../services/shared/partner.query'
 
-const Modals = ({
+const flattenObject = (obj: any, prefix = ''): Record<string, any> =>
+  Object.keys(obj).reduce((acc, key) => {
+    const propName = prefix ? `${prefix}.${key}` : key
+    if (typeof obj[key] === 'object' && obj[key] !== null) {
+      Object.assign(acc, flattenObject(obj[key], propName))
+    } else {
+      acc[propName] = obj[key]
+    }
+    return acc
+  }, {})
+
+interface FormWithSubmit {
+  onSubmit: (callback: () => void) => void
+  getInputProps: (name: string) => any
+}
+
+export type ModalProps<T> = {
+  opened: boolean
+  item: object
+  onSave: (values: any) => void
+  onClose: () => void
+  onDeleteButton?: (value) => void
+  isDeleting?: boolean
+  isViewing?: boolean
+  isLoading?: boolean
+  formName: string
+  modalTitle: string
+  form: T
+}
+
+// flat the data
+
+const Modals = <T extends FormWithSubmit>({
   opened,
-  onClose,
-  isViewing,
   item,
-  isDeleting,
   onSave,
-  inventory,
+  onClose,
+  onDeleteButton,
+  isDeleting,
+  isViewing,
   isLoading,
   form,
-}) => {
+  formName,
+  modalTitle,
+}: // isUpdating,
+
+ModalProps<T>) => {
+  const [customers, setCustomers] = useState([])
+  const [products, setProducts] = useState([])
+  if (modalTitle === 'New Sales Order') {
+    const { data: inventory } = fetchInventorysQuery(['inventory'])
+    const { data: partner } = fetchPartnerQuery(['partner'])
+
+    useEffect(() => {
+      console.log('Items ******************* ', inventory?.data)
+    }, [inventory?.data])
+
+    useEffect(() => {
+      setCustomers(partner?.map((item) => item.name))
+    }, [partner])
+  }
+
+  const formConfigs = {
+    add: addItemConfig,
+    partner: addPartnerConfig,
+    sales: addSalesConfig(customers, products),
+  }
+
+  const config = formConfigs[formName]
+
   return (
     <>
-      <Modal
+      <Modal.Root
         opened={opened}
         onClose={onClose}
-        title={
-          isViewing
-            ? 'View Inventory'
-            : item
-            ? 'Edit Inventory'
-            : 'Add Inventory'
-        }
         centered
-        size={'xl'}
+        // trapFocus={true}
+        size={isDeleting ? 'md' : 'xl'}
       >
-        <ModalBody>
-          {isViewing && item ? (
-            <Grid grow gutter="xl">
-              <Grid.Col span={4}>{item.name}</Grid.Col>
-              <Grid.Col span={4}>{item.brand.name}</Grid.Col>
-              <Grid.Col span={4}>{item.buyingPrice}</Grid.Col>
-              <Grid.Col span={4}>{item.barcode}</Grid.Col>
-              <Grid.Col span={4}>{item.category.name}</Grid.Col>
-              <Grid.Col span={4}>{item.productType}</Grid.Col>
-              <Grid.Col span={4}>{item.productUnit}</Grid.Col>
-              <Grid.Col span={4}>{item.quantity}</Grid.Col>
-              <Grid.Col span={4}>{item.sellingPrice}</Grid.Col>
-              <Grid.Col span={4}>{item.taxType}</Grid.Col>
-              <Grid.Col span={4}>{item.description}</Grid.Col>
-            </Grid>
-          ) : isDeleting && item ? (
-            <h1>are you sure u want to delete </h1>
-          ) : (
-            <form
-              onSubmit={form.onSubmit(onSave)}
-              // className="mt-6 "
-            >
-              <div className="flex gap-6">
-                <div className="flex-grow">
-                  <TextInput
-                    label="Name"
-                    placeholder="item name"
-                    {...form.getInputProps('name')}
-                  />
-                  <TextInput
-                    label="Code"
-                    placeholder="3490"
-                    {...form.getInputProps('barcode')}
-                    mt="md"
-                  />
+        <Modal.Overlay opacity={0.7} />
 
-                  <Autocomplete
-                    label="Category"
-                    placeholder="Pick value or enter anything"
-                    data={[
-                      ...new Set(
-                        inventory?.data.map((data) => data.category.name)
-                      ),
-                    ]}
-                    {...form.getInputProps('category')}
-                    mt="md"
-                  />
-
-                  <Autocomplete
-                    label="Brand"
-                    placeholder="Pick value or enter anything"
-                    // data={}
-                    data={[
-                      ...new Set(
-                        inventory?.data.map((data) => data.brand.name)
-                      ),
-                    ]}
-                    {...form.getInputProps('brand')}
-                    mt="md"
-                  />
-                  <TextInput
-                    label="Buying Price"
-                    placeholder="349.4839"
-                    {...form.getInputProps('buyingPrice')}
-                    mt="md"
-                  />
-                </div>
-                <div className="flex-grow">
-                  <NumberInput
-                    label="Quantity"
-                    placeholder="quntity"
-                    {...form.getInputProps('quantity')}
-                  />
-                  <NativeSelect
-                    label="Tax Type"
-                    // rightSection={
-                    //   <IconChevronDown
-                    //     style={{ width: rem(16), height: rem(16) }}
-                    //   />
-                    // }
-                    {...form.getInputProps('taxType')}
-                    data={['taxable', 'nonTaxable']}
-                    mt="md"
-                  />
-                  <NativeSelect
-                    label="Product Type"
-                    // rightSection={
-                    //   <IconChevronDown
-                    //     style={{ width: rem(16), height: rem(16) }}
-                    //   />
-                    // }
-                    {...form.getInputProps('productType')}
-                    data={['Sale', 'Use']}
-                    mt="md"
-                  />
-                  <NativeSelect
-                    label="Product Unit"
-                    // rightSection={
-                    //   <IconChevronDown
-                    //     style={{ width: rem(16), height: rem(16) }}
-                    //   />
-                    // }
-                    {...form.getInputProps('productUnit')}
-                    data={['pieces', 'kilograms', 'liters', 'boxes', 'meters']}
-                    mt="md"
-                  />
-                  <TextInput
-                    label="Selling Price"
-                    placeholder="749.4839"
-                    {...form.getInputProps('sellingPrice')}
-                    mt="md"
-                  />
-                  {/* <FileInput
-                    label="Image"
-                    placeholder="upload image"
-                    {...form.getInputProps('Image')}
-                    mt="md"
-                  /> */}
-                </div>
-              </div>
-              <TextInput
-                label="Descriprion"
-                placeholder="hulaal lalhulal lhausd"
-                {...form.getInputProps('description')}
-                mt="md"
+        <Modal.Content>
+          <Modal.Header className="bg-gray-200 h-3">
+            <Modal.Title>
+              <Text fw={500} size="md">
+                {/* {modalTitle !== '' ? modalTitle : 'Add Inventory'} */}
+                {modalTitle}
+              </Text>
+            </Modal.Title>
+            <Modal.CloseButton />
+          </Modal.Header>
+          <ModalBody className="bg-gray-50 pt-4">
+            {isViewing && item ? (
+              <>
+                <Grid grow gutter="xl">
+                  {Object.entries(item).map(([key, value]) =>
+                    typeof value === 'object' && value !== null ? (
+                      <Grid.Col>{String(value)}</Grid.Col>
+                    ) : (
+                      <Grid.Col span={4} key={key}>
+                        {String(value)}
+                      </Grid.Col>
+                    )
+                  )}
+                </Grid>
+              </>
+            ) : isDeleting && item ? (
+              <DeleteInventory
+                onDeleteButton={onDeleteButton}
+                onClose={onClose}
               />
-
-              <Button
-                type="submit"
-                // fullWidth
-
-                className="mt-6 mx-auto block"
-                loading={isLoading}
-                loaderProps={{
-                  type: 'dots',
-                }}
-              >
-                Save
-              </Button>
-            </form>
-          )}
-        </ModalBody>
-      </Modal>
+            ) : (
+              <AuthForm
+                form={form}
+                onSave={onSave}
+                isLoading={isLoading}
+                type="Add Inventory"
+                fields={config.fields}
+              />
+            )}
+          </ModalBody>
+        </Modal.Content>
+      </Modal.Root>
     </>
   )
 }
