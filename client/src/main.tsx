@@ -11,6 +11,7 @@ const queryClient = new QueryClient()
 import '@mantine/notifications/styles.css'
 import '@mantine/core/styles.css'
 import './index.css'
+import '@mantine/dates/styles.css'
 // import '@mantine/dropzone/styles.css'
 import { PersistGate } from 'redux-persist/es/integration/react'
 import { Notifications } from '@mantine/notifications'
