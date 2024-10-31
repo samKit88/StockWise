@@ -1,5 +1,6 @@
 import { useSelector } from 'react-redux'
-import { RootState } from '../store/store'
+import { RootState } from '../services/store/store'
+
 import { Navigate, Outlet } from 'react-router-dom'
 import axios from 'axios'
 
