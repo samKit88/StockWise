@@ -41,7 +41,7 @@ export class AuthController {
     return 'Hello bro';
   }
 
-  @Post('signup')
+  @Post('/signup')
   @HttpCode(HttpStatus.CREATED)
   signup(@Body() dto: SignupDto): Promise<ResponseDto> {
     console.log(dto.email);
