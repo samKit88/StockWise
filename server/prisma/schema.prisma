@@ -29,24 +29,25 @@ model image {
 }
 
 model inventory {
-  id           Int      @id @default(autoincrement())
+  id           Int          @id @default(autoincrement())
   userId       Int
   name         String
   barcode      String
   categoryId   Int
   brandId      Int
-  buyingPrice  Decimal  @db.Money
-  sellingPrice Decimal  @db.Money
+  buyingPrice  Decimal      @db.Money
+  sellingPrice Decimal      @db.Money
   productUnit  Unit
   quantity     Int
-  minStock     Int      @default(10)
+  minStock     Int          @default(10)
   taxType      Tax
   description  String
   productType  Product
   image        image[]
-  brand        brand    @relation(fields: [brandId], references: [id])
-  category     category @relation(fields: [categoryId], references: [id])
-  users        users    @relation(fields: [userId], references: [id])
+  saleItems    SalesItems[] // One-to-Many relation
+  brand        brand        @relation(fields: [brandId], references: [id])
+  category     category     @relation(fields: [categoryId], references: [id])
+  users        users        @relation(fields: [userId], references: [id])
 }
 
 model otp {
@@ -74,6 +75,38 @@ model users {
   otp          otp[]
 }
 
+model partner {
+  id            Int           @id @default(autoincrement())
+  name          String
+  email         String        @unique
+  customerGroup CustomerGroup
+  phoneNumber   Int
+  country       String
+  city          String
+  address       String
+  zipCode       Int
+  sales         sales[] // One-to-Many relation
+}
+
+model sales {
+  id          Int          @id @default(autoincrement())
+  salesNumber String       @unique
+  partnerId   Int
+  orderdDate  DateTime
+  salesItems  SalesItems[] // One-to-Many relation
+  partner     partner      @relation(fields: [partnerId], references: [id]) // Many-to-One relation
+}
+
+model SalesItems {
+  id          Int       @id @default(autoincrement())
+  saleId      Int
+  quantity    Int
+  unitPrice   Decimal   @db.Money
+  sale        sales     @relation(fields: [saleId], references: [id]) // Many-to-One relation
+  inventoryId Int
+  inventory   inventory @relation(fields: [inventoryId], references: [id]) // Many-to-One relation
+}
+
 enum Product {
   Sale
   Use
@@ -90,4 +123,11 @@ enum Unit {
   liters
   boxes
   meters
+}
+
+enum CustomerGroup {
+  Standard
+  Casual
+  Local
+  Foreign
 }

@@ -9,13 +9,17 @@ import { ConfigModule } from '@nestjs/config';
 import config from './config/config';
 import { ConfigService } from '@nestjs/config';
 import { MailService } from './mail/mail.service';
-// import { InventoryModule } from './inventory/inventory.module';
+import { InventoryModule } from './inventory/inventory.module';
 import { AuthGuard } from './guards/auth.guards';
+import { PartnerModule } from './partner/partner.module';
+import { SalesModule } from './sales/sales.module';
 
 @Module({
   imports: [
     AuthModule,
-    // InventoryModule,
+    InventoryModule,
+    PartnerModule,
+    SalesModule,
     PrismaModule,
 
     ConfigModule.forRoot({
@@ -32,7 +36,9 @@ import { AuthGuard } from './guards/auth.guards';
       global: true,
       inject: [ConfigService],
     }),
-    // InventoryModule,
+    InventoryModule,
+    PartnerModule,
+    SalesModule,
   ],
   controllers: [AppController],
   providers: [
