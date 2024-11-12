@@ -32,7 +32,7 @@ export const addItemConfig = {
       type: 'autocomplete',
       options: ['Electronics', 'Apparel', 'Grocery'],
     },
-    { label: 'Buying Price', name: 'buyingPrice', type: 'text' },
+    { label: 'Buying Price', name: 'buyingPrice', type: 'number' },
     {
       label: 'Tax Type',
       name: 'taxType',
@@ -53,7 +53,7 @@ export const addItemConfig = {
       type: 'select',
       options: ['pieces', 'kilograms', 'liters', 'boxes', 'meters'],
     },
-    { label: 'Selling Price', name: 'sellingPrice', type: 'text' },
+    { label: 'Selling Price', name: 'sellingPrice', type: 'number' },
 
     { label: 'Descriprion', name: 'description', type: 'text' },
   ],
