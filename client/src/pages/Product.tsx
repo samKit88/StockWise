@@ -286,7 +286,7 @@ const Product = () => {
             leftSection={<CiSearch />}
             className="w-2/3"
             size="md"
-            placeholder="Input placeholder"
+            placeholder="Search..."
             onChange={(e) => setSearchItem(e.target.value)}
           />
         </GridCol>
