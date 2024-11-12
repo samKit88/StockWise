@@ -2,9 +2,13 @@ import {
   AppShell,
   Avatar,
   Button,
+  Grid,
+  GridCol,
   Group,
+  Image,
   Menu,
   Text,
+  TextInput,
   UnstyledButton,
 } from '@mantine/core'
 import { IoLogOutOutline } from 'react-icons/io5'
@@ -27,18 +31,21 @@ import { Outlet, useNavigate } from 'react-router-dom'
 
 import { logout } from '../services/store/slice/authSlice'
 import InveImg from '../image/Inve4.avif'
+import LogoImage from '../image/StockWiseLogo.webp'
 import { useSelector } from 'react-redux'
 import { RootState, useAppDispatch } from '../services/store/store'
+import { CiSearch } from 'react-icons/ci'
+import { IoIosNotificationsOutline } from 'react-icons/io'
 
 const data = [
   { link: './product', label: 'Product', icon: <FaProductHunt /> },
   { link: './partner', label: 'Partner', icon: <FaPeopleGroup /> },
   { link: './sales', label: 'Sales', icon: <VscGraph /> },
+  { link: './purchase', label: 'Purchase', icon: <FaMoneyBillTransfer /> },
   { link: './trading', label: 'Trading', icon: <FaTradeFederation /> },
   { link: '', label: 'Expesne', icon: <FaExplosion /> },
   { link: '.', label: 'User Management', icon: <FaUsersRays /> },
   { link: '.', label: 'Reports', icon: <FaReplyAll /> },
-  { link: '.', label: 'Transfer', icon: <FaMoneyBillTransfer /> },
   { link: '.', label: 'Warehouse', icon: <FaWarehouse /> },
   { link: '.', label: 'Administrative Tools', icon: <FaAddressCard /> },
 ]
@@ -94,16 +101,16 @@ const Dashboard = () => {
 
   return (
     <AppShell
-      header={{ height: 60 }}
+      // header={{ height: 60 }}
       navbar={{
-        width: 250,
+        width: 225,
         breakpoint: 'sm',
-        collapsed: { mobile: !opened },
+        // collapsed: { mobile: !opened },
       }}
-      padding="sm"
+      // padding="sm"
       className="flex"
     >
-      <AppShell.Header className="flex justify-end ">
+      {/* <AppShell.Header className="flex justify-end ">
         <Menu withArrow>
           <Menu.Target>
             <UserButton image={InveImg} name={auth.user} role="admin" />
@@ -121,9 +128,10 @@ const Dashboard = () => {
             </Menu.Item>
           </Menu.Dropdown>
         </Menu>
-      </AppShell.Header>
+      </AppShell.Header> */}
 
       <AppShell.Navbar p="md" className="w-52">
+        <Image src={LogoImage} />
         {data?.map((data) => (
           <div key={data.label}>
             <Button
@@ -146,7 +154,40 @@ const Dashboard = () => {
       </AppShell.Navbar>
 
       <AppShell.Main className="ml-0 w-full">
-        <Outlet />
+        <Grid>
+          <GridCol className="flex justify-end ">
+            <TextInput
+              radius={10}
+              size="md"
+              leftSection={<CiSearch />}
+              className="w-1/4 mt-4"
+              placeholder="Search..."
+            />
+            {/* <Button> */}
+            <IoIosNotificationsOutline className="mt-4 size-10" />
+            {/* </Button> */}
+            <Menu withArrow>
+              <Menu.Target>
+                <UserButton image={InveImg} name={auth.user} role="admin" />
+              </Menu.Target>
+              <Menu.Dropdown>
+                <Menu.Item component="a" href="#">
+                  Your work space
+                </Menu.Item>
+                <Menu.Item
+                  leftSection={<IoLogOutOutline />}
+                  component="a"
+                  onClick={onLogOut}
+                >
+                  Logout
+                </Menu.Item>
+              </Menu.Dropdown>
+            </Menu>
+          </GridCol>
+          <GridCol>
+            <Outlet />
+          </GridCol>
+        </Grid>
       </AppShell.Main>
     </AppShell>
   )
