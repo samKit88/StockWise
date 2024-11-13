@@ -42,10 +42,10 @@ const data = [
   { link: './partner', label: 'Partner', icon: <FaPeopleGroup /> },
   { link: './sales', label: 'Sales', icon: <VscGraph /> },
   { link: './purchase', label: 'Purchase', icon: <FaMoneyBillTransfer /> },
+  { link: './ship', label: 'Ship', icon: <FaReplyAll /> },
   { link: './trading', label: 'Trading', icon: <FaTradeFederation /> },
   { link: '', label: 'Expesne', icon: <FaExplosion /> },
   { link: '.', label: 'User Management', icon: <FaUsersRays /> },
-  { link: '.', label: 'Reports', icon: <FaReplyAll /> },
   { link: '.', label: 'Warehouse', icon: <FaWarehouse /> },
   { link: '.', label: 'Administrative Tools', icon: <FaAddressCard /> },
 ]
@@ -110,26 +110,6 @@ const Dashboard = () => {
       // padding="sm"
       className="flex"
     >
-      {/* <AppShell.Header className="flex justify-end ">
-        <Menu withArrow>
-          <Menu.Target>
-            <UserButton image={InveImg} name={auth.user} role="admin" />
-          </Menu.Target>
-          <Menu.Dropdown>
-            <Menu.Item component="a" href="#">
-              Your work space
-            </Menu.Item>
-            <Menu.Item
-              leftSection={<IoLogOutOutline />}
-              component="a"
-              onClick={onLogOut}
-            >
-              Logout
-            </Menu.Item>
-          </Menu.Dropdown>
-        </Menu>
-      </AppShell.Header> */}
-
       <AppShell.Navbar p="md" className="w-52">
         <Image src={LogoImage} />
         {data?.map((data) => (
