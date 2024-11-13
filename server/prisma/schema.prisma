@@ -29,25 +29,26 @@ model image {
 }
 
 model inventory {
-  id           Int          @id @default(autoincrement())
-  userId       Int
-  name         String
-  barcode      String
-  categoryId   Int
-  brandId      Int
-  buyingPrice  Decimal      @db.Money
-  sellingPrice Decimal      @db.Money
-  productUnit  Unit
-  quantity     Int
-  minStock     Int          @default(10)
-  taxType      Tax
-  description  String
-  productType  Product
-  image        image[]
-  saleItems    SalesItems[] // One-to-Many relation
-  brand        brand        @relation(fields: [brandId], references: [id])
-  category     category     @relation(fields: [categoryId], references: [id])
-  users        users        @relation(fields: [userId], references: [id])
+  id            Int             @id @default(autoincrement())
+  userId        Int
+  name          String
+  barcode       String
+  categoryId    Int
+  brandId       Int
+  buyingPrice   Decimal         @db.Money
+  sellingPrice  Decimal         @db.Money
+  productUnit   Unit
+  quantity      Int
+  minStock      Int             @default(10)
+  taxType       Tax
+  description   String
+  productType   Product
+  image         image[]
+  saleItems     SalesItems[] // One-to-Many relation
+  purchaseItems PurchaseItems[]
+  brand         brand           @relation(fields: [brandId], references: [id])
+  category      category        @relation(fields: [categoryId], references: [id])
+  users         users           @relation(fields: [userId], references: [id])
 }
 
 model otp {
@@ -86,6 +87,8 @@ model partner {
   address       String
   zipCode       Int
   sales         sales[] // One-to-Many relation
+  perchase      Purchase[]
+  shippedItems  Shipment[]
 }
 
 model sales {
@@ -94,15 +97,56 @@ model sales {
   partnerId   Int
   orderdDate  DateTime
   salesItems  SalesItems[] // One-to-Many relation
-  partner     partner      @relation(fields: [partnerId], references: [id]) // Many-to-One relation
+  shipments   Shipment[]
+  partner     partner      @relation(fields: [partnerId], references: [id])
 }
 
 model SalesItems {
+  id           Int            @id @default(autoincrement())
+  saleId       Int
+  quantity     Int
+  unitPrice    Decimal        @db.Money
+  sale         sales          @relation(fields: [saleId], references: [id])
+  inventoryId  Int
+  inventory    inventory      @relation(fields: [inventoryId], references: [id])
+  shippedItems ShippedItems[]
+}
+
+model Shipment {
+  id             Int            @id @default(autoincrement())
+  shipmentNumber String
+  partnerId      Int
+  salesId        Int
+  shipmentDate   DateTime
+  shippedItems   ShippedItems[]
+  sales          sales          @relation(fields: [salesId], references: [id])
+  partner        partner        @relation(fields: [partnerId], references: [id])
+}
+
+model ShippedItems {
+  id          Int        @id @default(autoincrement())
+  shipmentId  Int
+  salesItemId Int
+  quantity    Int
+  shipment    Shipment   @relation(fields: [shipmentId], references: [id])
+  salesItem   SalesItems @relation(fields: [salesItemId], references: [id])
+}
+
+model Purchase {
+  id             Int             @id @default(autoincrement())
+  purchaseNumber String          @unique
+  partnerId      Int
+  orderdDate     DateTime
+  purchaseItmes  PurchaseItems[] // One-to-Many relation
+  partner        partner         @relation(fields: [partnerId], references: [id]) // Many-to-One relation
+}
+
+model PurchaseItems {
   id          Int       @id @default(autoincrement())
-  saleId      Int
+  purchaseId  Int
   quantity    Int
   unitPrice   Decimal   @db.Money
-  sale        sales     @relation(fields: [saleId], references: [id]) // Many-to-One relation
+  purchase    Purchase  @relation(fields: [purchaseId], references: [id]) // Many-to-One relation
   inventoryId Int
   inventory   inventory @relation(fields: [inventoryId], references: [id]) // Many-to-One relation
 }

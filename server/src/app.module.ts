@@ -13,6 +13,9 @@ import { InventoryModule } from './inventory/inventory.module';
 import { AuthGuard } from './guards/auth.guards';
 import { PartnerModule } from './partner/partner.module';
 import { SalesModule } from './sales/sales.module';
+import { PurchaseModule } from './purchase/purchase.module';
+import { ReceiptModule } from './receipt/receipt.module';
+import { ShipmentModule } from './shipment/shipment.module';
 
 @Module({
   imports: [
@@ -20,7 +23,10 @@ import { SalesModule } from './sales/sales.module';
     InventoryModule,
     PartnerModule,
     SalesModule,
+    PurchaseModule,
     PrismaModule,
+    ReceiptModule,
+    ShipmentModule,
 
     ConfigModule.forRoot({
       cache: true,
@@ -39,6 +45,9 @@ import { SalesModule } from './sales/sales.module';
     InventoryModule,
     PartnerModule,
     SalesModule,
+    PurchaseModule,
+    ReceiptModule,
+    ShipmentModule,
   ],
   controllers: [AppController],
   providers: [
