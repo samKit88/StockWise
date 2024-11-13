@@ -12,6 +12,7 @@ import Info from '../pages/Info'
 import Partner from '../pages/Partner'
 import Sales from '../pages/Sales'
 import Purchase from '../pages/Purchase'
+import Ship from '../pages/Ship'
 
 const router = createBrowserRouter([
   {
@@ -66,6 +67,11 @@ const router = createBrowserRouter([
           {
             path: 'purchase',
             element: <Purchase />,
+          },
+
+          {
+            path: 'ship',
+            element: <Ship />,
           },
         ],
       },

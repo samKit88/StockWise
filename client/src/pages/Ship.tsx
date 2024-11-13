@@ -1,6 +1,5 @@
 import {
   Button,
-  ButtonGroup,
   Card,
   Grid,
   GridCol,
@@ -13,89 +12,29 @@ import { CiSearch } from 'react-icons/ci'
 import { FaFileCsv, FaFilePdf, FaPrint } from 'react-icons/fa6'
 import { IoMdAddCircleOutline } from 'react-icons/io'
 import { MdLibraryAdd } from 'react-icons/md'
-import ProductTable from '../components/ProductTable'
-import Modals from '../components/ui/Modal'
-import { randomId, useDisclosure } from '@mantine/hooks'
-import { useForm, zodResolver } from '@mantine/form'
-import {
-  SalesFormData,
-  salesItemsSchema,
-  salesSchema,
-} from '../schema/salesSchema'
-import { useEffect, useState } from 'react'
-import {
-  createSalesMutation,
-  fetchSalesQuery,
-} from '../services/shared/sales.query'
-import { AxiosError } from 'axios'
 import SalesModal from '../components/ui/SalesModal'
+import { useDisclosure } from '@mantine/hooks'
+import ShipmentModal from '../components/ui/SalesModal'
+import ShipmentForm from '../components/ui/ShipmentForm'
 
-const Sales = () => {
+const Ship = () => {
   const [opened, { open, close }] = useDisclosure(false)
-  const modalTitle = 'New Sales Order'
-
-  const { data: sales, refetch } = fetchSalesQuery(['sales'])
-  const [filteredData, setFilteredData] = useState(sales?.data)
-
-  useEffect(() => {
-    setFilteredData(sales?.data)
-  }, [sales])
-
-  // useEffect(() => {
-  //   console.log('filtered Data', filteredData)
-  // }, [sales, filteredData])
-
-  const item = []
-  const form = useForm<SalesFormData>({
-    mode: 'uncontrolled',
-    initialValues: {
-      salesNumber: '',
-      orderDate: new Date(),
-      partnerId: '',
-      salesItems: [
-        { inventoryId: '', quantity: 0, unitPrice: 0, key: randomId() },
-      ],
-    },
-
-    // transformValues: (values) => ({
-    //   partnerId: parseInt(String(values.partnerId)),
-    // }),
-    validate: zodResolver(salesSchema),
-  })
-
-  const { mutateAsync, isLoading } = createSalesMutation(
-    (error: AxiosError | any) => console.log(error),
-    () => {
-      form.reset()
-      close()
-      refetch()
-    }
-  )
-
-  const column = [
-    { heading: '#', value: 'orderNumber' },
-    { heading: 'Customer', value: 'partner' },
-    { heading: 'Order#', value: 'salesNumber' },
-    { heading: 'Order Date', value: 'orderdDate' },
-    { heading: 'Total Amount', value: 'totalAmount' },
-    { heading: 'Action', render: () => <Button>Action</Button> },
-  ]
-  const data = []
-
-  const onSave = (values: SalesFormData) => {
-    values.orderDate = new Date(values.orderDate)
-    console.log('Date format *******\n', values)
-    mutateAsync(values)
-  }
 
   const onClose = () => {
     close()
   }
+  //   const modalTitle = 'New Shipment'
 
+  //   const form = []
+  //   const item = []
+  //   const column = []
+  //   const filteredData = []
+  //   const onSave = () => {}
+  //   const onClose = () => {}
   return (
     <Grid className="pt-4">
       <GridCol>
-        <Text>Sales/List</Text>
+        <Text>Ship/List</Text>
       </GridCol>
       <GridCol className=" pt-10">
         <GridCol>
@@ -109,7 +48,7 @@ const Sales = () => {
               open()
             }}
           >
-            <Text>Add Sales</Text>
+            <Text>Add Shipment</Text>
           </Button>
         </GridCol>
         <GridCol span={12} className="flex">
@@ -186,18 +125,12 @@ const Sales = () => {
           </GridCol>
         </GridCol>
         <GridCol>
-          <SalesModal
-            onClose={onClose}
+          <ShipmentForm
             opened={opened}
-            // isViewing={isViewing}
-            // isLoading={isLoading}
-            // isDeleting={isDeleting}
-            onSave={onSave}
-            // onDeleteButton={onDeleteButton}
-            item={item}
-            form={form}
-            modalTitle={modalTitle}
-            formName="sales"
+            onClose={onClose}
+            // form={form}
+            // onSave={onSave}
+            // modalTitle={modalTitle}
           />
         </GridCol>
         <GridCol>
@@ -208,13 +141,13 @@ const Sales = () => {
             radius="lg"
             withBorder
           >
-            <ProductTable data={filteredData} column={column} />
+            {/* <ProductTable data={filteredData} column={column} /> */}
             {/* <Pagination
-              className="flex justify-center my-4"
-              total={Math.ceil(inventory?.data.length ?? 0 / recordsPerPage)}
-              value={activePage}
-              onChange={setPage}
-            /> */}
+            className="flex justify-center my-4"
+            total={Math.ceil(inventory?.data.length ?? 0 / recordsPerPage)}
+            value={activePage}
+            onChange={setPage}
+          /> */}
           </Card>
         </GridCol>
       </GridCol>
@@ -222,4 +155,4 @@ const Sales = () => {
   )
 }
 
-export default Sales
+export default Ship
