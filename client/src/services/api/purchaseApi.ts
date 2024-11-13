@@ -1,5 +1,4 @@
 import axios, { Axios, AxiosError, AxiosResponse } from 'axios'
-import { SalesFormData } from '../../schema/salesSchema'
 import { PurchaseFormData } from '../../schema/purchaseSchema'
 
 export const fetchPurchase = async (): Promise<AxiosResponse<any>> => {

@@ -1,7 +1,7 @@
 import axios, { Axios, AxiosError, AxiosResponse } from 'axios'
 import { SalesFormData } from '../../schema/salesSchema'
 
-export const fetchSales = async (): Promise<AxiosResponse<any>> => {
+export const fetchSales = async () => {
   return await axios.get('http://localhost:3000/sales')
 }
 
