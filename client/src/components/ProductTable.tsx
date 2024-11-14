@@ -10,7 +10,7 @@ type NestedKeyOf<ObjectType> = {
     : Key // Direct key if not an object
 }[keyof ObjectType & (string | number)] // Restrict to valid types
 
-export type Column<T> = {
+interface Column<T> {
   heading: string
   value?: NestedKeyOf<T>
   render?: (item: T) => JSX.Element
@@ -22,7 +22,7 @@ interface ProductTableProp<T> {
 }
 
 const ProductTable = <T,>({ data, column }: ProductTableProp<T>) => {
-  console.log('data from the table', data)
+  // console.log('data from the table', data)
   return (
     <Table
       className="bg-gray-50 text-xs"
