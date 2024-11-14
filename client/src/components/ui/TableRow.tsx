@@ -1,6 +1,9 @@
 import { TableTd, TableTr } from '@mantine/core'
+import { object } from 'zod'
 
 const TableRow = ({ item, column }) => {
+  // console.log('data from row table ', {object.value.map(())})
+
   return (
     <>
       <TableTr>
@@ -8,14 +11,18 @@ const TableRow = ({ item, column }) => {
           if (columnItem.render) {
             return <TableTd key={index}>{columnItem.render(item)}</TableTd>
           }
-          if (columnItem.value.includes('.')) {
-            const itemSplit = columnItem.value.split('.')
+          if (columnItem.value.includes([])) {
+            const itemSplit = columnItem.value.split({})
+
             return (
-              <TableTd key={index}>
-                {item[itemSplit[0]][itemSplit[1]][itemSplit[2]]}
-              </TableTd>
+              // {}
+              <TableTd key={index}>{item[itemSplit[0]]}</TableTd>
+              // <TableTd></TableTd>
             )
           }
+          // if (columnItem.value.includes([])) {
+          //   const
+          // }
 
           return <TableTd>{item[`${columnItem.value}`]}</TableTd>
         })}

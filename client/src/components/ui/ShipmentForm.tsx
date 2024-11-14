@@ -1,7 +1,6 @@
 import {
-  ActionIcon,
-  Box,
   Button,
+  ComboboxItem,
   GridCol,
   Modal,
   NumberInput,
@@ -13,76 +12,41 @@ import {
 } from '@mantine/core'
 import { DateInput } from '@mantine/dates'
 import { useEffect, useState } from 'react'
-import { IoContractSharp } from 'react-icons/io5'
-import { ShipmentFormData, shipmentSchama } from '../../schema/shipment.schema'
-import { fetchInventorysQuery } from '../../services/shared/inventory.query'
+import { ShipmentFormData } from '../../schema/shipment.schema'
 import { fetchPartnerQuery } from '../../services/shared/partner.query'
-import { randomId, useDisclosure } from '@mantine/hooks'
-import { useForm, zodResolver } from '@mantine/form'
-import { createShipmentMutation } from '../../services/shared/shipment.query'
-import { AxiosError } from 'axios'
-import { fetchSalesQuery } from '../../services/shared/sales.query'
-import Sales from '../../pages/Sales'
+import { useForm } from '@mantine/form'
 
-// interface ShipmentFormPro {
-//   opened: boolean
-//   onClose: () => void
-//   form: ReturnType<typeof useForm<ShipmentFormData>>
-//   onSave: (value: any) => void
-//   isLoading?: boolean
-// }
+import { fetchSalesByIdQuery } from '../../services/shared/sales.query'
+
+interface ShipmentFormPro {
+  opened: boolean
+  onClose: () => void
+  form: ReturnType<typeof useForm<ShipmentFormData>>
+  onSave: (value: any) => void
+  // isLoading?: boolean
+}
 
 const ShipmentForm = ({
   opened,
   onClose,
-  //   onSave,
-  //   form,
-  //   isLoading,
-}) => {
-  const [active, setActive] = useState(0)
-  const [customers, setCustomers] = useState([])
-  const [products, setProducts] = useState([])
-  const [sale, setSales] = useState([])
+  onSave,
+  form,
+}: //   isLoading,
+ShipmentFormPro) => {
   const prevStep = () =>
     setActive((current) => (current > 0 ? current - 1 : current))
-
-  const { data: inventory } = fetchInventorysQuery(['inventory'])
-  const { data: partner } = fetchPartnerQuery(['partner'])
-  const { data: sales } = fetchSalesQuery(['sales'])
-
-  const form = useForm<ShipmentFormData>({
-    mode: 'uncontrolled',
-    initialValues: {
-      shipmentDate: new Date(),
-      shipmentNumber: '',
-      partnerId: '',
-      shippedItems: [{ quantity: 0, salesItemId: '', key: randomId() }],
-    },
-    validate: zodResolver(shipmentSchama),
-  })
-
-  const { mutateAsync, isLoading } = createShipmentMutation(
-    (error: AxiosError | any) => console.log(error),
-    () => {
-      form.reset()
-      onClose()
-      // refetch()
-    }
+  const [active, setActive] = useState(0)
+  const [customers, setCustomers] = useState([])
+  const [salesOrderId, setSalesOrderId] = useState([])
+  const [custoemrId, setcustoemrId] = useState<string | null>('')
+  const [orderedItems, setOrderedItems] = useState([])
+  const [selectedOrderId, setSelectedOrderId] = useState<ComboboxItem | null>(
+    null
   )
+  const [shipQuantities, setShipQuantities] = useState([])
 
-  const onSave = (values: ShipmentFormData) => {
-    values.shipmentDate = new Date(values.shipmentDate)
-    mutateAsync(values)
-  }
-
-  useEffect(() => {
-    setProducts(
-      inventory?.data.map((item) => ({
-        label: item.name,
-        value: item.id.toString(),
-      }))
-    )
-  }, [inventory?.data])
+  const { data: partner } = fetchPartnerQuery(['partner'])
+  const { data: orderedData } = fetchSalesByIdQuery(custoemrId)
 
   useEffect(() => {
     setCustomers(
@@ -94,13 +58,29 @@ const ShipmentForm = ({
   }, [partner])
 
   useEffect(() => {
-    setSales(
-      sales?.data.map((item) => ({
-        label: item.name,
+    setSalesOrderId(
+      orderedData?.data.map((item) => ({
+        label: item.salesNumber,
         value: item.id.toString(),
       }))
     )
-  }, [sales])
+  }, [orderedData?.data])
+
+  useEffect(() => {
+    orderedData?.data.map((item) => {
+      if (item.salesNumber === selectedOrderId?.label) {
+        setOrderedItems(item.salesItems)
+        // form.setFieldValue('salesItemsId', item.salesItems.id.toString())
+        // console.log('items', item)
+      }
+    })
+  }, [orderedData?.data, selectedOrderId, shipQuantities])
+
+  useEffect(() => {
+    if (orderedItems?.length) {
+      setShipQuantities(Array(orderedItems.length).fill(0))
+    }
+  }, [orderedItems])
 
   const handleSubmit = (values: ShipmentFormData) => {
     console.log(values)
@@ -112,68 +92,68 @@ const ShipmentForm = ({
           : new Date(values.shipmentDate).toISOString(),
       partnerId: parseInt(values.partnerId),
       salesId: parseInt(values.salesId),
+      shipmentNumber: values.shipmentNumber,
       shippedItems: values.shippedItems.map((value) => {
         const newItem = {
           ...value,
+          quantity: value.quantity,
           salesItemId: parseInt(value.salesItemId),
         }
+
+        console.log('ShippedItem before deletion:', newItem)
+
         delete newItem.key
+        delete newItem.remaining
+
+        console.log('ShippedItem after deletion:', newItem)
         return newItem
       }),
     }
+    console.log('Data To be Saved', dataToSend)
     onSave(dataToSend)
   }
 
-  useEffect(() => {
-    console.log(form.errors)
-    console.log(form.getValues())
-  }, [form.errors])
+  const handleQuantityChange = (index, value) => {
+    setShipQuantities((prev) =>
+      prev.map((qty, i) => (i === index ? value || 0 : qty))
+    )
 
-  const row = form.getValues().shippedItems.map((item, index) => (
-    <Table.Tr key={item.key}>
-      <Table.Td>
-        <Select
-          //   placeholder="John Doe"
-          withAsterisk
-          style={{ flex: 1 }}
-          // key={form.key(`salesItems.${index}.salesItemId`)}
-          data={products}
-          onChange={(value) =>
-            form.setFieldValue('salesItemId', parseInt(value))
-          }
-          {...form.getInputProps(`shippedItems.${index}.salesItemId`)}
-        />
-      </Table.Td>
-      <Table.Td>
-        <NumberInput
-          //   placeholder="John Doe"
-          withAsterisk
-          style={{ flex: 1 }}
-          // key={form.key(`shippedItems.${index}.quantity`)}
-          {...form.getInputProps(`shippedItems.${index}.quantity`)}
-        />
-      </Table.Td>
-      {/* <Table.Td>
-        <NumberInput
-          //   placeholder="John Doe"
-          withAsterisk
-          style={{ flex: 1 }}
-          // key={form.key(`shippedItems.${index}.quantity`)}
-          {...form.getInputProps(`shippedItems.${index}.unitPrice`)}
-        />
-      </Table.Td> */}
-      <Table.Td>
-        <ActionIcon
-          color="red"
-          onClick={() =>
-            index > 0 && form.removeListItem('shippedItems', index)
-          }
-        >
-          <IoContractSharp size="1rem" />
-        </ActionIcon>
-      </Table.Td>
-    </Table.Tr>
-  ))
+    // const updatedRemaining = item.quantity - (value || 0)
+
+    // form.setFieldValue(
+    //   `shippedItems[${index}].remaining`,
+    //   updatedRemaining
+    // )
+    // form.setFieldValue(`shippedItems[${index}].quantity`, item.quantity)
+  }
+
+  const row = form.getValues().shippedItems.map(() =>
+    orderedItems.length > 0
+      ? orderedItems?.map((item, index) => {
+          const shipQuantity = shipQuantities[index] || 0
+          const remaining = item.quantity - shipQuantity
+
+          return (
+            <Table.Tr key={item.key}>
+              <Table.Td>
+                {remaining < 0 ? <Text>Not Allowed</Text> : remaining}
+              </Table.Td>
+              <Table.Td>
+                <NumberInput
+                  className="w-28"
+                  key={form.key(`shippedItems.${index}.quantity`)}
+                  value={shipQuantity}
+                  onChange={(value) => handleQuantityChange(index, value)}
+                />
+              </Table.Td>
+              <Table.Td>{item.quantity}</Table.Td>
+              <Table.Td>{item.inventoryId}</Table.Td>
+              <Table.Td>{item.unitPrice}</Table.Td>
+            </Table.Tr>
+          )
+        })
+      : null
+  )
 
   return (
     <>
@@ -210,55 +190,42 @@ const ShipmentForm = ({
                       className="w-auto flex-1 min-w-[300px] "
                       label="Customer"
                       data={customers}
-                      onChange={(value) =>
-                        form.setFieldValue(
-                          parseInt('partnerId', parseInt(value))
-                        )
-                      }
-                      {...form.getInputProps('partnerId')}
+                      value={custoemrId}
+                      onChange={(value, option) => (
+                        // handleCustomer(option)
+                        console.log('partner Id ', value),
+                        form.setFieldValue('partnerId', value),
+                        setcustoemrId(value),
+                        setSelectedOrderId(null)
+                      )}
                     />
                     <Select
                       className="w-auto flex-1 min-w-[300px] "
                       label="Sales Order"
-                      data={customers}
-                      onChange={(value) =>
-                        form.setFieldValue(parseInt('salesId', parseInt(value)))
-                      }
-                      {...form.getInputProps('salesId')}
+                      data={salesOrderId}
+                      value={selectedOrderId ? selectedOrderId.value : null}
+                      onChange={(value, option) => (
+                        form.setFieldValue('salesId', value),
+                        setSelectedOrderId(option)
+                      )}
                     />
-                    {/* <GridCol className="w-auto flex-1 min-w-[300px] "></GridCol> */}
                   </GridCol>
                 </Stepper.Step>
                 <Stepper.Step label="Step 2">
-                  <Box className="w-full">
-                    <>
-                      <Table>
-                        <Table.Thead>
-                          <Table.Tr>
-                            <Table.Th>Product</Table.Th>
-                            <Table.Th>Quantity</Table.Th>
-                            <Table.Th>Unit Price</Table.Th>
-                          </Table.Tr>
-                        </Table.Thead>
-                        <Table.Tbody>{row}</Table.Tbody>
-                      </Table>
-                      <GridCol className="flex justify-center">
-                        <Button
-                          className="w-2/4 mt-7 mb-10"
-                          onClick={() =>
-                            form.insertListItem('shippedItems', {
-                              salesItemId: null,
-                              quantity: 0,
-                              unitPrice: 0,
-                              key: randomId(),
-                            })
-                          }
-                        >
-                          Add Item
-                        </Button>
-                      </GridCol>
-                    </>
-                  </Box>
+                  <>
+                    <Table>
+                      <Table.Thead>
+                        <Table.Tr>
+                          <Table.Th>Remaining</Table.Th>
+                          <Table.Th>Ship</Table.Th>
+                          <Table.Th>Quantity</Table.Th>
+                          <Table.Th>Product</Table.Th>
+                          <Table.Th>Unit Price</Table.Th>
+                        </Table.Tr>
+                      </Table.Thead>
+                      <Table.Tbody>{row}</Table.Tbody>
+                    </Table>
+                  </>
                 </Stepper.Step>
               </Stepper>
               <GridCol className="flex justify-end gap-10 mt-5">
@@ -285,7 +252,7 @@ const ShipmentForm = ({
                       gradient={{ from: 'blue', to: 'green', deg: 284 }}
                       type="submit"
                       // className="mt-6 mx-auto block"
-                      loading={isLoading}
+                      // loading={isLoading}
                       loaderProps={{
                         type: 'dots',
                       }}
