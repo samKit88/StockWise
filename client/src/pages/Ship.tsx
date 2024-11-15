@@ -13,9 +13,17 @@ import { FaFileCsv, FaFilePdf, FaPrint } from 'react-icons/fa6'
 import { IoMdAddCircleOutline } from 'react-icons/io'
 import { MdLibraryAdd } from 'react-icons/md'
 import SalesModal from '../components/ui/SalesModal'
-import { useDisclosure } from '@mantine/hooks'
+import { randomId, useDisclosure } from '@mantine/hooks'
 import ShipmentModal from '../components/ui/SalesModal'
 import ShipmentForm from '../components/ui/ShipmentForm'
+import { fetchInventorysQuery } from '../services/shared/inventory.query'
+import { fetchPartnerQuery } from '../services/shared/partner.query'
+import { fetchSalesQuery } from '../services/shared/sales.query'
+import { ShipmentFormData, shipmentSchama } from '../schema/shipment.schema'
+import { useForm, zodResolver } from '@mantine/form'
+import { createShipmentMutation } from '../services/shared/shipment.query'
+import { AxiosError } from 'axios'
+import { useEffect } from 'react'
 
 const Ship = () => {
   const [opened, { open, close }] = useDisclosure(false)
@@ -23,14 +31,35 @@ const Ship = () => {
   const onClose = () => {
     close()
   }
-  //   const modalTitle = 'New Shipment'
 
-  //   const form = []
-  //   const item = []
-  //   const column = []
-  //   const filteredData = []
-  //   const onSave = () => {}
-  //   const onClose = () => {}
+  const form = useForm<ShipmentFormData>({
+    mode: 'uncontrolled',
+    initialValues: {
+      shipmentDate: new Date(),
+      shipmentNumber: '',
+      partnerId: '',
+      salesId: '',
+      shippedItems: [
+        { quantity: 0, salesItemId: '', key: randomId(), remaining: 0 },
+      ],
+    },
+    validate: zodResolver(shipmentSchama),
+  })
+
+  const { mutateAsync, isLoading } = createShipmentMutation(
+    (error: AxiosError | any) => console.log(error),
+    () => {
+      form.reset()
+      onClose()
+      // refetch()
+    }
+  )
+
+  const onSave = (values: ShipmentFormData) => {
+    values.shipmentDate = new Date(values.shipmentDate)
+    mutateAsync(values)
+  }
+
   return (
     <Grid className="pt-4">
       <GridCol>
@@ -128,8 +157,8 @@ const Ship = () => {
           <ShipmentForm
             opened={opened}
             onClose={onClose}
-            // form={form}
-            // onSave={onSave}
+            form={form}
+            onSave={onSave}
             // modalTitle={modalTitle}
           />
         </GridCol>
