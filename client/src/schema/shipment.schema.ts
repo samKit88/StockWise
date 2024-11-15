@@ -3,11 +3,12 @@ import * as z from 'zod'
 export const shippedItemsSchama = z.object({
   quantity: z.number(),
   salesItemId: z.string(),
+  remaining: z.number(),
   key: z.string().optional(),
 })
 
 export const shipmentSchama = z.object({
-  shipmentNumber: z.string().regex(/^SSO-\d+$/, 'Use Valid format PO-XXXXX'),
+  shipmentNumber: z.string().regex(/^SSO-\d+$/, 'Use Valid format SSO-XXXXX'),
   salesId: z.string(),
   partnerId: z.string(),
   shipmentDate: z.date(),
