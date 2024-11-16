@@ -16,6 +16,7 @@ import { SalesModule } from './sales/sales.module';
 import { PurchaseModule } from './purchase/purchase.module';
 import { ReceiptModule } from './receipt/receipt.module';
 import { ShipmentModule } from './shipment/shipment.module';
+import { ReceiveModule } from './receive/receive.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { ShipmentModule } from './shipment/shipment.module';
     PrismaModule,
     ReceiptModule,
     ShipmentModule,
+    ReceiveModule,
 
     ConfigModule.forRoot({
       cache: true,
@@ -42,12 +44,6 @@ import { ShipmentModule } from './shipment/shipment.module';
       global: true,
       inject: [ConfigService],
     }),
-    InventoryModule,
-    PartnerModule,
-    SalesModule,
-    PurchaseModule,
-    ReceiptModule,
-    ShipmentModule,
   ],
   controllers: [AppController],
   providers: [
