@@ -89,6 +89,7 @@ model partner {
   sales         sales[] // One-to-Many relation
   perchase      Purchase[]
   shippedItems  Shipment[]
+  receivedItems Receive[]
 }
 
 model sales {
@@ -138,17 +139,39 @@ model Purchase {
   partnerId      Int
   orderdDate     DateTime
   purchaseItmes  PurchaseItems[] // One-to-Many relation
+  received       Receive[]
   partner        partner         @relation(fields: [partnerId], references: [id]) // Many-to-One relation
 }
 
 model PurchaseItems {
-  id          Int       @id @default(autoincrement())
-  purchaseId  Int
-  quantity    Int
-  unitPrice   Decimal   @db.Money
-  purchase    Purchase  @relation(fields: [purchaseId], references: [id]) // Many-to-One relation
-  inventoryId Int
-  inventory   inventory @relation(fields: [inventoryId], references: [id]) // Many-to-One relation
+  id            Int             @id @default(autoincrement())
+  quantity      Int
+  unitPrice     Decimal         @db.Money
+  purchaseId    Int
+  purchase      Purchase        @relation(fields: [purchaseId], references: [id]) // Many-to-One relation
+  inventoryId   Int
+  inventory     inventory       @relation(fields: [inventoryId], references: [id]) // Many-to-One relation
+  receivedItems ReceivedItems[]
+}
+
+model Receive {
+  id            Int             @id @default(autoincrement())
+  receiveNumber String
+  partnerId     Int
+  purchaseId    Int
+  receivedDate  DateTime
+  receivedItems ReceivedItems[]
+  purchase      Purchase        @relation(fields: [purchaseId], references: [id])
+  partner       partner         @relation(fields: [partnerId], references: [id])
+}
+
+model ReceivedItems {
+  id               Int           @id @default(autoincrement())
+  receiveId        Int
+  purchasedItemsId Int
+  quantity         Int
+  receive          Receive       @relation(fields: [receiveId], references: [id])
+  purchaseItems    PurchaseItems @relation(fields: [purchasedItemsId], references: [id])
 }
 
 enum Product {
