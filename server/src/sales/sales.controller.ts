@@ -4,6 +4,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Param,
   Post,
   UseGuards,
 } from '@nestjs/common';
@@ -18,6 +19,13 @@ export class SalesController {
   @Get()
   getAll() {
     return this.salesService.getAll();
+  }
+  @UseGuards(AuthGuard('jwt'))
+  @Get('/:id')
+  @HttpCode(HttpStatus.OK)
+  getById(@Param('id') id: string) {
+    const customerId = parseInt(id);
+    return this.salesService.getById(customerId);
   }
 
   @UseGuards(AuthGuard('jwt'))
