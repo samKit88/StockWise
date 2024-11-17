@@ -35,6 +35,19 @@ export class SalesService {
     return responseData;
   }
 
+  async getById(customerId: number) {
+    const orderedData = this.prismaService.sales.findMany({
+      where: {
+        partnerId: customerId,
+      },
+      include: {
+        salesItems: true,
+      },
+    });
+
+    return orderedData;
+  }
+
   async create(data: salesDto) {
     const salesData = await this.prismaService.sales.create({
       data: {
